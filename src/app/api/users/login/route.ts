@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 
 connect();
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, response: NextResponse) {
   try {
     const reqBody = await request.json();
     const { email, password } = reqBody;
@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    console.log("user: ");
 
     //Check is password is correct
     const validPassword = await bcryptjs.compare(password, user.password);
@@ -40,15 +41,21 @@ export async function POST(request: NextRequest) {
       expiresIn: "1d",
     });
 
-    const response = NextResponse.json({
-      message: "Login Successful",
-      success: true,
-    });
+    const response = NextResponse.json(
+      {
+        message: "Login Successful",
+        success: true,
+      },
+      { status: 200 }
+    );
+
     response.cookies.set("token", token, {
       httpOnly: true,
     });
     return response;
   } catch (error: any) {
+    console.log("Error from login route");
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
